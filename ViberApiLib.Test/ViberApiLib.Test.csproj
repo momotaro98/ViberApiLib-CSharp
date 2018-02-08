@@ -36,5 +36,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ViberApiLib\ViberApiLib.csproj">
+      <Project>{E57AF7FF-2904-4B20-92AA-C2B4A4C91A7C}</Project>
+      <Name>ViberApiLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
