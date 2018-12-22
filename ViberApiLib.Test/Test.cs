@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ViberApiLib.Test
 {
@@ -13,6 +14,24 @@ namespace ViberApiLib.Test
         protected void SetUp()
         {
             api = new Api("testAuthToken", "testBotName", "testAvatarPath");
+        }
+
+        [Test]
+        public void TestSendMessages()
+        {
+            // Arrange
+            var userIdList = new List<string>{"user1", "user2", "user3"};
+            var taskList = new List<Task<string>>{};
+            // Act
+            foreach (var userid in userIdList)
+            {
+                Task<string> response = api.SendMessages(userid, "text");
+                taskList.Add(response);
+            }
+            var t = Task.WhenAll(taskList);
+            // Assert
+            Assert.IsInstanceOf<Task>(t);
+//            var result = t.Result; // Actual consumer will attack the task result with Result
         }
 
         [Test]
