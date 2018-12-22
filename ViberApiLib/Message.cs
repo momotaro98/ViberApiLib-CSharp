@@ -21,7 +21,7 @@ namespace ViberApiLib
         Constants.KEYBOARD
         };
 
-        public Message Create(string jsonString)
+        public static Message Create(string jsonString)
         {
             var values = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonString);
 
@@ -30,7 +30,7 @@ namespace ViberApiLib
                 throw new KeyNotFoundException("Necessary key of Viber message, \"type\" is not in the request payload.");
             }
 
-            string typeStr = values["type"].ToString();
+            var typeStr = values["type"].ToString();
 
             if (!MessageTypeList.Contains(typeStr))
             {
@@ -50,36 +50,24 @@ namespace ViberApiLib
 
     public class Message
     {
-        private string _type;
-        public string Type
-        {
-            get { return _type; }
-        }
+        public string Type { get; }
 
-        private string _trackingData;
-        public string TrackingData
-        {
-            get { return _trackingData; }
-        }
+        public string TrackingData { get; }
 
-        public Message(Dictionary<string, object> dict)
+        public Message(IReadOnlyDictionary<string, object> dict)
         {
-            _type = dict["type"].ToString();
-            _trackingData = dict["tracking_data"].ToString();
+            Type = dict["type"].ToString();
+            TrackingData = dict["tracking_data"].ToString();
         }
     }
 
     public class TextMessage : Message
     {
-        private string _text;
-        public string Text
-        {
-            get { return _text; }
-        }
+        public string Text { get; }
 
-        public TextMessage(Dictionary<string, object> dict) : base(dict)
+        public TextMessage(IReadOnlyDictionary<string, object> dict) : base(dict)
         {
-            _text = dict["text"].ToString();
+            Text = dict["text"].ToString();
         }
     }
 }

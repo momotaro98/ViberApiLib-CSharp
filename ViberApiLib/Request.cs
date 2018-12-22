@@ -62,22 +62,14 @@ namespace ViberApiLib
 
     public class Request
     {
-        private string _eventType;
-        public string Event
-        {
-            get { return _eventType; }
-        }
+        public string Event { get; }
 
-        private string _timeStamp;
-        public string TimeStamp
-        {
-            get { return _timeStamp; }
-        }
+        public string TimeStamp { get; }
 
         public Request(Dictionary<string, object> requestDict)
         {
-            _eventType = requestDict["event"].ToString();
-            _timeStamp = requestDict["timestamp"].ToString();
+            Event = requestDict["event"].ToString();
+            TimeStamp = requestDict["timestamp"].ToString();
         }
     }
 
@@ -87,7 +79,7 @@ namespace ViberApiLib
 
         public SubscribedRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            string userStr = requestDict["user"].ToString();
+            var userStr = requestDict["user"].ToString();
             var userDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(userStr);
             User = new UserProfile(userDict);
         }
@@ -95,15 +87,11 @@ namespace ViberApiLib
 
     public class UnsubscribedRequest : Request
     {
-        private string _user_id;
-        public string UserId
-        {
-            get { return _user_id; }
-        }
+        public string UserId { get; }
 
         public UnsubscribedRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            _user_id = requestDict["user_id"].ToString();
+            UserId = requestDict["user_id"].ToString();
         }
     }
 
@@ -114,27 +102,23 @@ namespace ViberApiLib
 
         public MessageRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            string userStr = requestDict["sender"].ToString();
+            var userStr = requestDict["sender"].ToString();
             var userDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(userStr);
             User = new UserProfile(userDict);
 
-            string messageStr = requestDict["message"].ToString();
-            MessageFactory messageFactory = new MessageFactory();
-            Message = messageFactory.Create(messageStr);
+            var messageStr = requestDict["message"].ToString();
+            var messageFactory = new MessageFactory();
+            Message = MessageFactory.Create(messageStr);
         }
     }
 
     public class SeenRequest : Request
     {
-        private string _user_id;
-        public string UserId
-        {
-            get { return _user_id; }
-        }
+        public string UserId { get; }
 
         public SeenRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            _user_id = requestDict["user_id"].ToString();
+            UserId = requestDict["user_id"].ToString();
         }
     }
 
@@ -152,29 +136,21 @@ namespace ViberApiLib
 
     public class DeliveredRequest : Request
     {
-        private string _user_id;
-        public string UserId
-        {
-            get { return _user_id; }
-        }
+        public string UserId { get; }
 
         public DeliveredRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            _user_id = requestDict["user_id"].ToString();
+            UserId = requestDict["user_id"].ToString();
         }
     }
 
     public class FailedRequest : Request
     {
-        private string _user_id;
-        public string UserId
-        {
-            get { return _user_id; }
-        }
+        public string UserId { get; }
 
         public FailedRequest(Dictionary<string, object> requestDict) : base(requestDict)
         {
-            _user_id = requestDict["user_id"].ToString();
+            UserId = requestDict["user_id"].ToString();
         }
     }
 
