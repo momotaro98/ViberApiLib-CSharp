@@ -28,10 +28,10 @@ namespace ViberApiLib.Test
                 Task<string> response = api.SendMessages(userid, "text");
                 taskList.Add(response);
             }
+            // await Task.WhenAll(taskList); // An example usage for async method
             var t = Task.WhenAll(taskList);
             // Assert
             Assert.IsInstanceOf<Task>(t);
-//            var result = t.Result; // Actual consumer will attack the task result with Result
         }
 
         [Test]
