@@ -57,7 +57,7 @@ namespace ViberApiLib
             return signature == CalculateMessageSignature(requestData);
         }
 
-        public Request ParseRequest(string jsonRequest)
+        public static Request ParseRequest(string jsonRequest)
         {
             var factory = new RequstFactory();
             return factory.Create(jsonRequest);
