@@ -3,45 +3,35 @@ using System.Text;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace ViberApiLib
 {
     public class Api
     {
-        private string _authToken;
-        public string AuthToken
-        {
-            get { return _authToken; }
-        }
+        public string AuthToken { get; }
 
-        private string _botName;
-        public string BotName
-        {
-            get { return _botName; }
-        }
+        public string BotName { get; }
 
-        private string _avatarPath;
-        public string AvatarPath
-        {
-            get { return _avatarPath; }
-        }
+        public string AvatarPath { get; }
 
         public Api(string authToken, string botName, string avatarPath)
         {
-            _authToken = authToken;
-            _botName = botName;
-            _avatarPath = avatarPath;
+            AuthToken = authToken;
+            BotName = botName;
+            AvatarPath = avatarPath;
         }
 
-        public string SendMessages(string userId, string text, string trackingData = "")
+        public async Task<string> SendMessages(string userId, string text, string trackingData = "")
         {
-            var dictPayload = prepareSendMessagesPayload(message: text, receiver: userId, senderName: BotName, senderAvatar: AvatarPath, trackingData: trackingData);
-            string paylaod = JsonConvert.SerializeObject(dictPayload);
-            return PostRequest(Constants.SEND_MESSAGE, paylaod);
+            var dictPayload = PrepareSendMessagesPayload(message: text, receiver: userId, senderName: BotName, senderAvatar: AvatarPath, trackingData: trackingData);
+            var payload = JsonConvert.SerializeObject(dictPayload);
+            var response = await PostRequest(Constants.SEND_MESSAGE, payload);
+            return response;
         }
 
-        public string SetWebhook(string url, List<string> event_types = null)
+        public async Task<string> SetWebhook(string url, List<string> event_types = null)
         {
             var dictPayload = new Dictionary<string, object>()
         {
@@ -52,28 +42,28 @@ namespace ViberApiLib
             {
                 dictPayload.Add("event_types", event_types);
             }
-            string paylaod = JsonConvert.SerializeObject(dictPayload);
-            var result = PostRequest(Constants.SET_WEBHOOK, paylaod);
+            var payload = JsonConvert.SerializeObject(dictPayload);
+            var result = await PostRequest(Constants.SET_WEBHOOK, payload);
             var values = JsonConvert.DeserializeObject<Dictionary<string, object>>(result);
             if (values["status"].ToString() != "0")
             {
-                return string.Format("Failed with status: {0}, massage: {1}", values["status"], values["status_message"]);
+                return $"Failed with status: {values["status"]}, massage: {values["status_message"]}";
             }
             return values["event_types"].ToString();
         }
 
         public bool VerifySignature(string requestData, string signature)
         {
-            return signature == calculateMessageSignature(requestData);
+            return signature == CalculateMessageSignature(requestData);
         }
 
-        public Request ParseRequest(string jsonRequest)
+        public static Request ParseRequest(string jsonRequest)
         {
-            RequstFactory factory = new RequstFactory();
+            var factory = new RequstFactory();
             return factory.Create(jsonRequest);
         }
 
-        private Dictionary<string, object> prepareSendMessagesPayload(string message, string receiver, string senderName, string senderAvatar, string trackingData)
+        private Dictionary<string, object> PrepareSendMessagesPayload(string message, string receiver, string senderName, string senderAvatar, string trackingData)
         {
             return new Dictionary<string, object>()
         {
@@ -91,22 +81,23 @@ namespace ViberApiLib
         };
         }
 
-        public string PostRequest(string endPoint, string payload)
+        public async Task<string> PostRequest(string endPoint, string payload)
         {
-            HttpClient client = new HttpClient();
-            StringContent content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            var client = new HttpClient();
+            var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
             // post data to Viber API
-            HttpResponseMessage response = client.PostAsync(Constants.VIBER_BOT_API_URL + "/" + endPoint, content).Result;
-            return response.Content.ReadAsStringAsync().Result;
+            var apiResponse = await client.PostAsync(Constants.VIBER_BOT_API_URL + "/" + endPoint, content);
+            var response = await apiResponse.Content.ReadAsStringAsync();
+            return response;
         }
 
-        private string calculateMessageSignature(string message)
+        private string CalculateMessageSignature(string message)
         {
-            byte[] keyByte = new ASCIIEncoding().GetBytes(AuthToken);
-            byte[] messageBytes = new ASCIIEncoding().GetBytes(message);
+            var keyByte = new ASCIIEncoding().GetBytes(AuthToken);
+            var messageBytes = new ASCIIEncoding().GetBytes(message);
 
-            byte[] hashmessage = new HMACSHA256(keyByte).ComputeHash(messageBytes);
-            return string.Concat(Array.ConvertAll(hashmessage, x => x.ToString("x2")));
+            var hash = new HMACSHA256(keyByte).ComputeHash(messageBytes);
+            return string.Concat(Array.ConvertAll(hash, x => x.ToString("x2")));
         }
     }
 }
